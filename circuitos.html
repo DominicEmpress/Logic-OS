@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Logic OS | By Dominic</title>
+    <style>
+        :root { 
+            --accent: #0cf; --bg: #050505; --panel: rgba(25, 25, 25, 0.95); 
+            --wire-0: #ff3333; --wire-1: #00ffaa;
+            --glow-0: rgba(255, 51, 51, 0.4); --glow-1: rgba(0, 255, 170, 0.4);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+
+/* Caja que contiene los botones ocultos */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #111;
+            min-width: 140px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 2000; /* Por encima de todo */
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 5px;
+        }
+
+/* Mostrar al pasar el mouse */
+        .dropdown:hover .dropdown-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* Ajuste para los botones dentro del menú */
+        .dropdown-content .tool-btn {
+            width: 100%;
+            text-align: left;
+        }
+
+
+
+
+        .ddropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+
+/* Caja que contiene los botones ocultos */
+        .ddropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #111;
+            min-width: 140px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 2000; /* Por encima de todo */
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 5px;
+        }
+
+/* Mostrar al pasar el mouse */
+        .ddropdown:hover .ddropdown-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* Ajuste para los botones dentro del menú */
+        .ddropdown-content .tool-btn {
+            width: 100%;
+            text-align: left;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .files-down {
+            position: relative;
+            display: inline-block;
+        }
+
+
+/* Caja que contiene los botones ocultos */
+        .files-down-content {
+            display: none;
+            position: absolute;
+            background-color: #111;
+            min-width: 140px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 2000; /* Por encima de todo */
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 5px;
+        }
+
+/* Mostrar al pasar el mouse */
+        .files-down:hover .files-down-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        /* Ajuste para los botones dentro del menú */
+        .files-down-content .tool-btn {
+            width: 100%;
+            text-align: left;
+        }
+
+
+
+
+
+
+
+
+        
+        body, html { background-color: var(--bg); color: white; font-family: sans-serif; overflow: hidden; margin: 0; height: 100%; width: 100%; }
+        
+        #toolbar { 
+            height: 75px; background: #111; padding: 0 20px; border-bottom: 2px solid #333; 
+            display: flex; gap: 10px; align-items: center; position: absolute; top: 0; left: 0; right: 0; z-index: 9000; overflow: visible !important;
+        }
+
+        #viewport { width: 100vw; height: 100vh; overflow: hidden; cursor: grab; background: var(--bg); }
+        #world { position: absolute; top: 0; left: 0; width: 50000px; height: 45000px; transform-origin: 0 0; }
+        #grid-bg { position: absolute; width: 100%; height: 100%; background-image: radial-gradient(#1a1a1a 3px, transparent 1px); background-size: 40px 40px; }
+
+        .component {
+            position: absolute; min-width: 160px; background: var(--panel); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; user-select: none; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .handle { height: 32px; background: rgba(0,0,0,0.8); cursor: move; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-bottom: 1px solid #333; }
+        .close-btn { color: #ff4444; background: none; border: none; cursor: pointer; font-size: 20px; }
+        .rotate-btn { color: var(--accent); background: none; border: none; cursor: pointer; font-size: 16px; margin-right: 5px; }
+
+        .content { padding: 15px; text-align: center; position: relative; min-height: 60px; }
+        .status-box { font-size: 26px; font-family: monospace; font-weight: bold; margin: 5px 0; }
+
+        .ultra-mode .val-0 { color: var(--wire-0); filter: drop-shadow(0 0 10px var(--glow-0)); }
+        .ultra-mode .val-1 { color: var(--wire-1); filter: drop-shadow(0 0 10px var(--glow-1)); }
+
+        .port { width: 16px; height: 16px; border-radius: 50%; position: absolute; cursor: crosshair; border: 2px solid #fff; box-sizing: border-box; z-index: 30; background: #000; }
+        .input-port { background: #fff; left: -8px; }
+        .output-port { background: #000; right: -8px; }
+        .bottom-port { bottom: -8px; left: 50%; transform: translateX(-50%); background: #0cf; }
+        
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .cable { fill: none; stroke-width: 4; stroke-linecap: round; }
+        
+        .tool-btn { background: #1a1a1a; color: #eee; border: 1px solid #444; padding: 6px 10px; cursor: pointer; border-radius: 6px; font-size: 10px; font-weight: bold; white-space: nowrap; }
+        .tool-btn:hover { background: #333; border-color: var(--accent); }
+        .gate-input { width: 80%; background: #222; color: var(--accent); border: 1px solid #444; padding: 4px; margin-bottom: 5px; border-radius: 4px; text-align: center; }
+
+        .push-btn-ui { 
+            width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(#f33, #800); 
+            border: 4px solid #222; cursor: pointer; margin: 10px auto; box-shadow: 0 4px #111;
+        }
+        .push-btn-ui:active { transform: translateY(2px); box-shadow: 0 2px #000; background: radial-gradient(#f55, #a00); }
+
+        /* Estilos Nuevos para el LED */
+        .led-box {
+            width: 50px; height: 50px; background: #000; border: 2px solid #444; margin: 5px auto;
+            border-radius: 4px; transition: 0.2s;
+        }
+        .color-controls { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
+        .color-trigger {
+            width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 1px solid #fff;
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); /* Multicolor paint look */
+        }
+        .color-preview {
+            width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; background: #00ff00;
+        }
+
+        .switch-container { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--accent); }
+        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: #fff; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(16px); }
+    </style>
+</head>
+<body class="ultra-mode">
+
+
+
+<div id="toolbar">
+    <p style="
+    font-size: 30px; 
+    color: cyan; 
+    font-weight: bold;">
+    Logic OS
+</p>
+    <button class="tool-btn" style="color:cyan" onclick="volverCentro()">🎯 CENTRO</button>
+    <button class="tool-btn" onclick="createComponent('gate')" style="color:#0cf">+ COMPUERTA</button>
+    <div class="dropdown">
+        <button class="tool-btn" style="color:#0cf">📂 COMPONENTES ▼</button>
+        <div class="dropdown-content">
+            <button class="tool-btn" onclick="createComponent('lever')">+ PALANCA</button>
+            <button class="tool-btn" onclick="createComponent('button')" style="color:#ff3333">+ BOTÓN</button>
+            <button class="tool-btn" onclick="createComponent('block')" style="color:#ff00ff">+ BLOCK</button>
+            <button class="tool-btn" onclick="createComponent('light')">+ LUZ</button>
+            <button class="tool-btn" onclick="createComponent('led')" style="color:#ffff00;">💡 LED PRO</button>
+        </div>
+    </div>
+    <div class="ddropdown">
+        <button class="tool-btn" style="color:#0cf">📂 FLIPS-FLOPS ▼</button>
+        <div class="ddropdown-content">
+            <button class="tool-btn" onclick="createFlipFlop()" style="color:violet">+ FLIP-FLOP</button>
+            <button class="tool-btn" onclick="createAdvancedFF('T')" style="color:red">+ T-FF</button>
+            <button class="tool-btn" onclick="createAdvancedFF('JK')" style="color:green">+ JK-FF</button>
+        </div>
+    </div>
+    
+    <div style="width: 1px; height: 30px; background: #444; margin: 0 5px;"></div>
+    
+    <div class="files-down">
+        <button class="tool-btn" style="color:#0cf">📂 ARCHIVO ▼</button>
+        <div class="files-down-content">
+            <button class="tool-btn" onclick="saveProject()" style="color:grey">💾 GUARDAR</button>
+            <button class="tool-btn" onclick="document.getElementById('load-input').click()" style="color:yellow">📂 CARGAR</button>
+            <button class="tool-btn" onclick="document.getElementById('custom-input').click()" style="color:#00ffaa">+ CUSTOM (.txt)</button>
+        </div>
+    </div>
+
+    <div class="switch-container" style="margin-left:auto">
+        <span>FX</span>
+        <label class="switch"><input type="checkbox" checked onchange="toggleFX(this)"><span class="slider"></span></label>
+    </div>
+
+    <input type="file" id="custom-input" style="display:none" accept=".txt" onchange="loadCustomGate(event)">
+    <input type="file" id="load-input" style="display:none" accept=".json" onchange="loadProject(event)">
+</div>
+
+<div id="viewport" onmousedown="startPan(event)">
+    <div id="world">
+        <div id="grid-bg"></div>
+        <svg id="svg-canvas"></svg>
+    </div>
+</div>
+
+<script>
+    let components = [];
+    let connections = [];
+    let selectedPort = null;
+    let draggingComp = null;
+    let offset = { x: 0, y: 0 };
+    let camera = { 
+        x: (window.innerWidth / 2) - 25000, // 10000 es la mitad del ancho (20000px)
+        y: (window.innerHeight / 2) - 22500, // 7500 es la mitad del alto (15000px)
+        isPanning: false, 
+        startX: 0, 
+        startY: 0 
+    };
+    let mousePos = { x: 0, y: 0 };
+    let fxEnabled = true;
+
+    const world = document.getElementById('world');
+    const svg = document.getElementById('svg-canvas');
+
+    function toggleFX(cb) { fxEnabled = cb.checked; document.body.classList.toggle('ultra-mode', fxEnabled); }
+    function startPan(e) { if (e.target.id === "viewport" || e.target.id === "grid-bg") { camera.isPanning = true; camera.startX = e.clientX - camera.x; camera.startY = e.clientY - camera.y; } }
+
+    function createComponent(type) {
+        const id = 'comp-' + Date.now() + Math.floor(Math.random()*1000);
+        let newComp = { id, type, value: 0, rotation: 0, inputs: {}, x: (Math.abs(camera.x) + 200) + 'px', y: (Math.abs(camera.y) + 200) + 'px' };
+        
+        if(type === 'block') newComp.inputs = { A: 0, B: 0 };
+        else if(type === 'gate' || type === 'light') newComp.inputs = { in1: 0, in2: 0 };
+        else if(type === 'led') {
+            newComp.inputs = { in1: 0 };
+            newComp.ledColor = '#00ff00'; // Color por defecto verde
+        }
+        else if(type === 'random') {
+            newComp.inputs = { in1: 0 };
+            newComp.lastIn = 0;
+        }
+
+        components.push(newComp);
+        renderComponentUI(newComp);
+    }
+
+    function renderComponentUI(c) {
+        const div = document.createElement('div');
+        div.className = 'component'; div.id = c.id;
+        div.style.left = c.x; div.style.top = c.y;
+        if(c.rotation) div.style.transform = `rotate(${c.rotation}deg)`;
+
+        let inner = `<div class="handle" onmousedown="dragStart(event, '${c.id}')">
+            <div><button class="rotate-btn" onclick="rotateComp('${c.id}')">⟳</button><span>${(c.name || c.type).toUpperCase()}</span></div>
+            <button class="close-btn" onclick="deleteComp('${c.id}')">×</button>
+        </div><div class="content">`;
+
+        if(c.type === 'custom') {
+            let pts = '';
+            const inKeys = Object.keys(c.inputs);
+            const outKeys = Object.keys(c.outputs || {out:0});
+            inKeys.forEach((k, i) => pts += `<div class="port input-port" data-port="${k}" style="top:${(i+1)*(100/(inKeys.length+1))}%" onmousedown="portMouseDown(event, '${c.id}', '${k}')"></div>`);
+            outKeys.forEach((k, i) => pts += `<div class="port output-port" data-port="${k}" style="top:${(i+1)*(100/(outKeys.length+1))}%" onmousedown="portMouseDown(event, '${c.id}', '${k}')"></div>`);
+            inner += `<strong>${c.name}</strong><div class="status-box val-0">0</div>${pts}`;
+        } else if(c.type === 'button') {
+            inner += `<div class="push-btn-ui" onmousedown="setBtn('${c.id}', 1)" onmouseup="setBtn('${c.id}', 0)" onmouseleave="setBtn('${c.id}', 0)"></div>
+                      <div class="port output-port" data-port="out" style="top:55px" onmousedown="portMouseDown(event, '${c.id}', 'out')"></div>`;
+        } else if(c.type === 'block') {
+            inner += `<strong>BLOCK</strong><div class="status-box val-0">0</div>
+                      <div class="port input-port" data-port="A" style="top:50%" onmousedown="portMouseDown(event, '${c.id}', 'A')"></div>
+                      <div class="port bottom-port" data-port="B" onmousedown="portMouseDown(event, '${c.id}', 'B')"></div>
+                      <div class="port output-port" data-port="out" style="top:50%" onmousedown="portMouseDown(event, '${c.id}', 'out')"></div>`;
+        } else if(c.type === 'lever') {
+            inner += `<button class="tool-btn" style="width:100%" onclick="toggleLever('${c.id}')">SWITCH</button><div class="port output-port" data-port="out" style="top:55px" onmousedown="portMouseDown(event, '${c.id}', 'out')"></div><div class="status-box val-0">0</div>`;
+        } else if(c.type === 'gate') {
+            inner += `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 5px;">
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'AND')">AND</button>
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'NAND')">NAND</button>
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'OR')">OR</button>
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'NOR')">NOR</button>
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'NOT')">NOT</button>
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'XOR')">XOR</button>
+            <button class="tool-btn" style="font-size:8px; padding:2px;" onclick="handleSetupBtn('${c.id}', 'XNOR')">XNOR</button>
+        </div>
+        <div class="status-box val-0">0</div>`;
+        } else if(c.type === 'light') {
+            inner += `<span>SIGNAL</span><div class="port input-port" data-port="in1" style="top:55px" onmousedown="portMouseDown(event, '${c.id}', 'in1')"></div><div class="status-box val-0">0</div>`;
+        } else if(c.type === 'flipflop') {
+            const keys = Object.keys(c.inputs);
+            keys.forEach((k, i) => {
+                inner += `<div class="port input-port" data-port="${k}" style="top:${(i+1)*(100/(keys.length+1))}%" onmousedown="portMouseDown(event,'${c.id}','${k}')"></div>
+                          <span style="position:absolute; left:10px; font-size:9px; top:${(i+1)*(100/(keys.length+1))}%">${k}</span>`;
+            });
+            inner += `<div class="port output-port" data-port="Q" style="top:30%" onmousedown="portMouseDown(event,'${c.id}','Q')"></div>
+                      <div class="port output-port" data-port="nQ" style="top:70%" onmousedown="portMouseDown(event,'${c.id}','nQ')"></div>
+                      <span style="position:absolute; right:10px; font-size:9px; top:30%">Q</span>
+                      <span style="position:absolute; right:10px; font-size:9px; top:70%">!Q</span>`;
+        } else if(c.type === 'led') {
+            // UI Nueva para el LED
+            inner += `
+                <div class="led-box" id="led-${c.id}"></div>
+                <div class="color-controls">
+                    <input type="color" id="picker-${c.id}" value="${c.ledColor || '#00ff00'}" style="display:none" oninput="updateLedColor('${c.id}', this.value)">
+                    <div class="color-trigger" onclick="document.getElementById('picker-${c.id}').click()" title="Cambiar color"></div>
+                    <div class="color-preview" id="prev-${c.id}" style="background:${c.ledColor || '#00ff00'}"></div>
+                </div>
+                <div class="port input-port" data-port="in1" style="top:50%" onmousedown="portMouseDown(event, '${c.id}', 'in1')"></div>
+            `;
+        }
+        
+        div.innerHTML = inner + `</div>`;
+        world.appendChild(div);
+    }
+
+    function loadCustomGate(event) {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l);
+            const gateName = lines[0];
+            const logicMap = {}; let inCount=0, outCount=0;
+            lines.slice(1).forEach((l, i) => {
+                const m = l.match(/\((.*)\)=(.*)/);
+                if(m) {
+                    const cond = m[1].replace(/-/g, '');
+                    const outs = m[2].replace(/[()]/g, '').split('-').map(Number);
+                    logicMap[cond] = outs;
+                    if(i===0){ inCount = cond.length; outCount = outs.length; }
+                }
+            });
+            const c = { id: 'cust-'+Date.now(), type: 'custom', name: gateName, value: 0, rotation:0, logicMap, inCount, outCount, 
+                        inputs: Object.fromEntries(Array.from({length:inCount},(_,i)=>['in'+(i+1),0])),
+                        outputs: Object.fromEntries(Array.from({length:outCount},(_,i)=>['out'+(i+1),0])),
+                        x: (Math.abs(camera.x)+200)+'px', y: (Math.abs(camera.y)+200)+'px' };
+            components.push(c); renderComponentUI(c);
+        }; reader.readAsText(file);
+    }
+
+    function createFlipFlop() {
+        const id = 'ff-' + Date.now();
+        const c = { id, type: 'custom', name: 'D-FLIPFLOP', value: 0, rotation: 0, state: 0, prevClk: 0, inputs: { D: 0, CLK: 0 }, outputs: { Q: 0 }, x: (Math.abs(camera.x)+200)+'px', y: (Math.abs(camera.y)+200)+'px' };
+        components.push(c); renderComponentUI(c);
+    }
+
+    function update() {
+        components.forEach(c => { if(c.type !== 'lever' && c.type !== 'button') Object.keys(c.inputs).forEach(k => c.inputs[k] = 0); });
+
+        connections.forEach(cn => {
+            const s = components.find(x => x.id === cn.from), t = components.find(x => x.id === cn.to);
+            if(s && t) {
+                const val = (s.outputs && s.outputs[cn.fromPort]) !== undefined ? s.outputs[cn.fromPort] : s.value;
+                if(val === 1) t.inputs[cn.toPort] = 1;
+                cn.val = val;
+            }
+        });
+
+        components.forEach(c => {
+            if(c.name === 'D-FLIPFLOP') {
+                if(c.inputs.CLK === 1 && c.prevClk === 0) c.state = c.inputs.D;
+                c.prevClk = c.inputs.CLK; c.outputs.Q = c.state; c.value = c.state;
+            } else if(c.logicMap) {
+                const cond = Object.values(c.inputs).join('');
+                const res = c.logicMap[cond] || new Array(c.outCount).fill(0);
+                res.forEach((v, i) => c.outputs[`out${i+1}`] = v); c.value = res[0];
+            } else if(c.type === 'block') {
+                c.value = (c.inputs.B === 1) ? c.inputs.A : 0;
+            } else if(c.type === 'gate' && c.gateType) {
+                const i1 = c.inputs.in1, i2 = c.inputs.in2;
+                if(c.gateType==='AND') c.value = i1 && i2 ? 1:0;
+                else if(c.gateType==='NAND') c.value = i1 && i2 ? 0:1;
+                else if(c.gateType==='OR') c.value = i1 || i2 ? 1:0;
+                else if(c.gateType==='NOR') c.value = i1 || i2 ? 0:1;
+                else if(c.gateType==='NOT') c.value = i1 ? 0:1;
+                else if(c.gateType==='NNOT') c.value = i1 ? 1:0;
+                else if(c.gateType==='XOR') c.value = i1 ^ i2 ? 1:0;
+                else if(c.gateType==='XOR') c.value = i1 ^ i2 ? 0:1;
+            } else if(c.type === 'light') {
+                c.value = c.inputs.in1;
+            } else if(c.type === 'flipflop') {
+                const risingEdge = (c.inputs.CLK === 1 && c.prevClk === 0);
+                if(risingEdge) {
+                    if(c.ffType === 'T' && c.inputs.T === 1) {
+                        c.state = c.state ? 0 : 1; // Conmuta si T es 1
+                    } else if(c.ffType === 'JK') {
+                        if(c.inputs.J && c.inputs.K) c.state = c.state ? 0 : 1; // Toggle
+                        else if(c.inputs.J) c.state = 1; // Set
+                        else if(c.inputs.K) c.state = 0; // Reset
+                    }
+                }
+                c.prevClk = c.inputs.CLK;
+                c.outputs.Q = c.state;
+                c.outputs.nQ = c.state ? 0 : 1;
+                c.value = c.state;
+            } else if(c.type === 'random') {
+                if(c.inputs.in1 === 1 && c.lastIn === 0) { 
+                    c.value = Math.random() > 0.5 ? 1 : 0; // Genera 0 o 1 al recibir pulso
+                }
+                c.lastIn = c.inputs.in1;
+            } else if(c.type === 'led') {
+                // Lógica del LED PRO
+                c.value = c.inputs.in1;
+                const ledBox = document.getElementById(`led-${c.id}`);
+                if(ledBox) {
+                    if(c.value === 1) {
+                        ledBox.style.background = c.ledColor;
+                        ledBox.style.boxShadow = `0 0 20px ${c.ledColor}`; // Glow effect
+                    } else {
+                        ledBox.style.background = '#000';
+                        ledBox.style.boxShadow = 'none';
+                    }
+                }
+            }
+
+            const d = document.querySelector(`#${c.id} .status-box`);
+            if(d) { d.innerText = c.value; d.className = `status-box ${c.value ? 'val-1' : 'val-0'}`; }
+        });
+        renderWires(); requestAnimationFrame(update);
+    }
+
+    function renderWires() {
+        let h = '';
+        connections.forEach(cn => {
+            const o = document.querySelector(`#${cn.from} [data-port="${cn.fromPort || 'out'}"]`);
+            const i = document.querySelector(`#${cn.to} [data-port="${cn.toPort}"]`);
+            if(o && i) {
+                const r1 = o.getBoundingClientRect(), r2 = i.getBoundingClientRect(), wr = world.getBoundingClientRect();
+                const x1 = (r1.left + 8) - wr.left, y1 = (r1.top + 8) - wr.top;
+                const x2 = (r2.left + 8) - wr.left, y2 = (r2.top + 8) - wr.top;
+                const col = cn.val ? 'var(--wire-1)':'var(--wire-0)';
+                h += `<path class="cable" d="M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}" stroke="${col}" style="${fxEnabled ? `filter:drop-shadow(0 0 5px ${col})`:''}"/>`;
+            }
+        });
+        if(selectedPort) h += `<path class="cable" style="stroke:#555; stroke-dasharray:5" d="M ${selectedPort.x} ${selectedPort.y} C ${(selectedPort.x+mousePos.x)/2} ${selectedPort.y}, ${(selectedPort.x+mousePos.x)/2} ${mousePos.y}, ${mousePos.x} ${mousePos.y}" stroke="#fff" />`;
+        svg.innerHTML = h;
+    }
+
+    function setBtn(id, val) { components.find(c => c.id === id).value = val; }
+    function rotateComp(id) { const c = components.find(x => x.id === id); c.rotation = (c.rotation + 90) % 360; document.getElementById(id).style.transform = `rotate(${c.rotation}deg)`; }
+    function deleteComp(id) { document.getElementById(id).remove(); components = components.filter(c => c.id !== id); connections = connections.filter(cn => cn.from !== id && cn.to !== id); }
+    function toggleLever(id) { const c = components.find(x => x.id === id); c.value = c.value ? 0 : 1; }
+
+    function handleSetupBtn(id, type) {
+        // Si no se pasa 'type' (por si acaso), intentamos leerlo del input viejo, 
+        // pero ahora lo recibimos directamente del clic del botón.
+        const gateType = type || 'AND'; 
+    
+        const comp = components.find(c => c.id === id);
+        if (comp) {
+            comp.gateType = gateType;
+            setupGateUI(id, gateType);
+        }
+    }
+    
+    // Nueva función para actualizar el color del LED
+    function updateLedColor(id, color) {
+        const c = components.find(x => x.id === id);
+        if(c) {
+            c.ledColor = color;
+            const preview = document.getElementById(`prev-${id}`);
+            if(preview) preview.style.background = color;
+        }
+    }
+
+    function setupGateUI(id, type) {
+        const cont = document.querySelector(`#${id} .content`);
+        let p = `<div class="port output-port" data-port="out" style="top:55px" onmousedown="portMouseDown(event, '${id}', 'out')"></div>`;
+        if(type === 'NOT') p += `<div class="port input-port" data-port="in1" style="top:55px" onmousedown="portMouseDown(event, '${id}', 'in1')"></div>`;
+        else p += `<div class="port input-port" data-port="in1" style="top:40px" onmousedown="portMouseDown(event, '${id}', 'in1')"></div><div class="port input-port" data-port="in2" style="top:70px" onmousedown="portMouseDown(event, '${id}', 'in2')"></div>`;
+        cont.innerHTML = `<strong>${type}</strong><div class="status-box val-0">0</div>${p}`;
+    }
+
+    function portMouseDown(e, compId, portName) {
+        const rect = e.target.getBoundingClientRect(), wr = world.getBoundingClientRect();
+        selectedPort = { compId, portName, x: (rect.left + 8) - wr.left, y: (rect.top + 8) - wr.top, type: e.target.classList.contains('output-port') ? 'out' : 'in' };
+        e.stopPropagation(); e.preventDefault();
+    }
+
+    window.addEventListener('mousemove', (e) => {
+        const wr = world.getBoundingClientRect(); mousePos.x = e.clientX - wr.left; mousePos.y = e.clientY - wr.top;
+        if (camera.isPanning) { camera.x = e.clientX - camera.startX; camera.y = e.clientY - camera.startY; world.style.transform = `translate(${camera.x}px, ${camera.y}px)`; }
+        if(draggingComp) { draggingComp.style.left = (mousePos.x - offset.x) + 'px'; draggingComp.style.top = (mousePos.y - offset.y) + 'px'; }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+        if(selectedPort && e.target.classList.contains('port')) {
+            const tCompId = e.target.closest('.component').id, tPortName = e.target.getAttribute('data-port'), tType = e.target.classList.contains('output-port') ? 'out' : 'in';
+            if(selectedPort.type !== tType && selectedPort.compId !== tCompId) {
+                connections.push({ 
+                    from: selectedPort.type === 'out' ? selectedPort.compId : tCompId, 
+                    fromPort: selectedPort.type === 'out' ? selectedPort.portName : tPortName,
+                    to: selectedPort.type === 'in' ? selectedPort.compId : tCompId,
+                    toPort: selectedPort.type === 'in' ? selectedPort.portName : tPortName 
+                });
+            }
+        }
+        selectedPort = null; draggingComp = null; camera.isPanning = false;
+    });
+
+    function dragStart(e, id) { draggingComp = document.getElementById(id); const rect = draggingComp.getBoundingClientRect(); offset.x = e.clientX - rect.left; offset.y = e.clientY - rect.top; e.stopPropagation(); }
+
+    function saveProject() {
+        const data = { camera, connections, components: components.map(c => ({ ...c, x: document.getElementById(c.id).style.left, y: document.getElementById(c.id).style.top })) };
+        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "logic_pro_save.json"; a.click();
+    }
+
+    function loadProject(event) {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = JSON.parse(e.target.result);
+            world.querySelectorAll('.component').forEach(el => el.remove());
+            components = []; connections = data.connections; camera = data.camera;
+            world.style.transform = `translate(${camera.x}px, ${camera.y}px)`;
+            data.components.forEach(c => { components.push(c); renderComponentUI(c); if(c.gateType) setupGateUI(c.id, c.gateType); });
+        }; reader.readAsText(file);
+    }
+
+    function createAdvancedFF(ffType) {
+        const id = 'ff-' + Date.now();
+        let c = { 
+            id, type: 'flipflop', ffType, value: 0, state: 0, prevClk: 0, rotation: 0, 
+            x: (Math.abs(camera.x)+200)+'px', y: (Math.abs(camera.y)+200)+'px', 
+            outputs: { Q: 0, nQ: 1 } 
+        };
+    
+        // Configuramos entradas según el tipo
+        if(ffType === 'T') c.inputs = { T: 0, CLK: 0 };
+        else if(ffType === 'JK') c.inputs = { J: 0, K: 0, CLK: 0 };
+    
+        components.push(c);
+        renderComponentUI(c); 
+    }
+
+    function volverCentro() {
+        world.style.transform = `translate(0px, 0px)`;
+    }
+
+// Modifica tu createComponent actual o asegúrate de que acepte 'random'
+// Si ya tienes createComponent, añade este pedazo de lógica dentro:
+    /*
+    if(type === 'random') {
+        newComp.inputs = { in1: 0 };
+        newComp.lastIn = 0;
+    }
+    */
+    world.style.transform = `translate(${camera.x}px, ${camera.y}px)`;
+
+    update();
+</script>
+</body>
+</html>
