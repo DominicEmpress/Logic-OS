@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DominicProjects</title>
+    <style>
+        /* Usamos las variables de color de Logic OS */
+        :root { 
+            --accent: #0cf; 
+            --bg: #050505; 
+            --panel: rgba(25, 25, 25, 0.95); 
+        }
+
+        body, html { 
+            background-color: var(--bg); 
+            color: white; 
+            font-family: sans-serif; 
+            margin: 0; 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden;
+        }
+
+        /* Toolbar estilo Logic OS */
+        #toolbar { 
+            height: 75px; 
+            background: #111; 
+            padding: 0 20px; 
+            border-bottom: 2px solid #333; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px;
+        }
+
+        /* Título con forma de serpiente (estático) */
+        .snake-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .snake-text span {
+            display: inline-block;
+            font-size: 30px;
+            font-weight: bold;
+            color: var(--accent);
+            /* Borde negro grueso */
+            text-shadow: 
+                -1.5px -1.5px 0 #000,  
+                 1.5px -1.5px 0 #000,
+                -1.5px  1.5px 0 #000,
+                 1.5px  1.5px 0 #000;
+        }
+
+        /* Posicionamiento manual para crear la forma de onda/serpiente */
+        .snake-text span:nth-child(odd) { transform: translateY(-5px); }
+        .snake-text span:nth-child(even) { transform: translateY(5px); }
+        .snake-text span:nth-child(3n) { transform: translateY(-8px); }
+
+        /* Botones estilo Logic OS */
+        .tool-btn { 
+            background: #1a1a1a; 
+            color: #eee; 
+            border: 1px solid #444; 
+            padding: 8px 15px; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            font-size: 12px; 
+            font-weight: bold; 
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .tool-btn:hover { 
+            background: #333; 
+            border-color: var(--accent); 
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Contenido principal */
+        #main-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 77px);
+            background-image: radial-gradient(#1a1a1a 3px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .welcome-text {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="toolbar">
+    <p style="color:cyan; font-size: 40px;">DominicProjects</p>
+
+    <div style="flex-grow: 1;"></div>
+
+    <a href="https://github.com/DominicEmpress/Logic-OS" class="btn tool-btn">Pagina Git-Hub DominicEmpress</a>
+    <a href="https://dominicempress.github.io/Logic-OS/circuitos.html" class="btn tool-btn" style="color: var(--accent);">Logic OS</a>
+</div>
+
+<div id="main-content">
+    <div class="welcome-text">Selecciona un proyecto en la barra superior</div>
+</div>
+
+</body>
+</html>
